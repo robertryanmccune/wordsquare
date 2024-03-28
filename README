@@ -1,4 +1,4 @@
-README WordSquare Generator
+README WordSquare Solver and Generator
 Copyright 2024, Robert Ryan McCune <robertryanmccune@gmail.com>
 
 TABLE OF CONTENTS
@@ -38,7 +38,7 @@ the remaining words to create a wordsquare.  Empirically,
 at least 3 words are required to compute a wordsquare,
 any fewer will take too long.  Multiple valid 
 wordsquares can be found.  This implementation 
-uses preprocessing to drastically reduce runtime.
+uses preprocessing to significantly improve runtime.
 
 
 2.  CONTENTS	
@@ -47,14 +47,12 @@ uses preprocessing to drastically reduce runtime.
 	LICENSE - the BSD license for this software
 	Makefile - commands for compilation
 	main.cpp - the main program
-	bin/ - the default output directory for compiled binaries
 	input/ - directory for input files to wordsquare program
 		location to put output from preprocessing
 		includes sample input files
 	lib/ - directory for the common header file
 	objects/ - directory for the 5 objects used
 		in the main program
-	out/ - directory for wordsquare output
 	preprocessing/ - directory for the preprocessing file
 	wordlist/ - directory for a wordlist
 		sample wordlist and license is included
@@ -69,7 +67,7 @@ enter from the command line:
 	
 Which will compile both the main program
 and the preprocessing program.
-The default output directory is bin/
+The default output directory is the home directory
 
 To compile only the main program, enter:
 
@@ -100,7 +98,7 @@ reasoning behind the file names
 
 To execute the preprocessing program, run:
 	
-	./bin/preproc [wl_in] [di_out] [re_out] [ma_out]
+	./preproc [wl_in] [di_out] [re_out] [ma_out]
 	
 Where:
 	- wl_in = wordlist input file
@@ -117,7 +115,7 @@ because the files are input for the main wordsquare program.
 To re-generate the sample files provided in the input directory,
 after compiling, execute:
 
-	./bin/preproc wordlist/wordlist-20210729.txt  input/dict.sample  input/regs.sample  input/matches.sample	
+	./preproc wordlist/wordlist-20210729.txt  input/dict.sample  input/regs.sample  input/matches.sample	
 	
 The reason for the  3 input files is explained in
 Section 7 Implementation Details
@@ -134,7 +132,7 @@ To run the program, include the 4 input files
 as well as an output file location to write
 the resultant wordsquares
 
-	./bin/wordsquares [di_in] [re_in] [ma_in] [seeds_in] [squares_out]
+	./wordsquares [di_in] [re_in] [ma_in] [seeds_in] [squares_out]
 	
 Where:
 	- di_in, re_in, and ma_in = di_out, re_out, and ma_out from the preprocessing program
@@ -143,7 +141,7 @@ Where:
 	
 To run the main wordsquare program with the provided sample files, run:
 
-	./bin/wordsquares  input/dict.sample  input/regs.sample  input/matches.sample  input/seeds.txt  out/wordsquares.txt
+	./wordsquares  input/dict.sample  input/regs.sample  input/matches.sample  input/seeds.txt  wordsquares.txt
 
 	
 5.	USAGE
@@ -154,7 +152,7 @@ The seeds file is a list of words to include in wordsquare.
 The minimum number of seed words allowed is 3 (any less would take 
 days to compute).  The maximum is 10, in which case the program
 would see if a wordsquare can be formed exclusively with
-the input words.  Less than 4 seed words or more than 10
+the input words.  Less than 3 seed words or more than 10
 seed words will cause the program to exit.
 
 A word in the seed file must be 5 characters.  To include
@@ -232,11 +230,11 @@ and the number of columns is equal to the number of entries in
 Regs.  The corresponding cell is '1' if the word can be
 represented, or "matched", by the regular expression.  e.g.
 	
-      ... | s**te | ta*** | ***te | ...
-...	  |       |       |       | ...
-state ... |     1 |     0 |     1 | ...
-taste ... |     0 |     1 |     1 | ...
-...   ... |   ... |  ...  | ...
+...     | s**te | ta*** | ***te |...
+...     |       |       |       |...
+state   |     1 |     0 |     1 |...
+taste   |     0 |     1 |     1 |...
+...
 
 In the above table, "state" can be represented by "s**te"", 
 so it's entry is 1.  "taste" can be represented by "ta***",
@@ -339,7 +337,8 @@ We then traverse down the column, and every time
 there is a '1' we add the index of that row to an array.
 Since the matrix is stored in Compressed Sparse Column 
 (CSC) format, all the 0's are eliminated, and we can 
-easily and efficiently find each entry.
+easily and efficiently find all the rows indices
+that match the regex.
 
 Finally, we iterate through the array of row indices,
 and for each row index we look up the actual word
@@ -363,19 +362,19 @@ Compressed Sparse Column.
 
 For the simple implementation:
 
-# seed words	| runtime (in s) 
-6				| 0.085
-5				| 6.3
-4				| 3062
-3				| --
+# seed words | runtime (in s) 
+6            | 0.085
+5            | 6.3
+4            | 3062
+3            | --
 
 For the approach withe preprocessing and CSC
 
-# seed words 	| runtime (in s)
-6				| 0.13
-5				| 0.13
-4				| 1.50
-3				| 2327
+# seed words  | runtime (in s)
+6             | 0.13
+5             | 0.13
+4             | 1.50
+3             | 2327
 
 Preprocessing: 21.5s, which only needs 
 to be computed once, and can be used to

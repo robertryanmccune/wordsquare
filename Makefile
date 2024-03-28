@@ -17,7 +17,7 @@ PP_DIR = preprocessing
 PP = preproc.cpp
 
 #Output Directory
-OUT_DIR = bin
+OUT_DIR = .
 
 #Output Files
 WS_OUT = wordsquares
