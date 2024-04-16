@@ -8,7 +8,7 @@ MA = Matches.cpp
 RE = Regs.cpp
 SQ = Square.cpp
 SQS = Squares.cpp
-MAIN = Main.cpp
+MAIN = main.cpp
 
 #Preprocessing Directories
 PP_DIR = preprocessing
